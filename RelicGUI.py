@@ -1,64 +1,74 @@
 import PySimpleGUI as sg
 import relics as rel
 
+f18 = ("Helvetica", 18)
+f16 = ("Helvetica", 16)
+f14 = ("Helvetica", 14)
+f12 = ("Helvetica", 12)
+
 # Used GUI element definitions
 def text_el(*args, **kwargs):
-	return [sg.Text(*args, **kwargs)]
+	return sg.Text(*args, **kwargs)
 
 def combo_el(*args, **kwargs):
-	return [sg.Combo(*args, **kwargs, default_value = args[0][0], enable_events = True)]
+	return sg.Combo(*args, **kwargs, default_value = args[0][0], enable_events = True)
 
 def search_el(name, *args, **kwargs):
-	return [sg.Text("Search:"), sg.Combo(*args, key = name + "-COMBO", **kwargs),
-		sg.Button("Update", key = name + "-UPDATE", **kwargs), sg.Button("+", key = name + "-ADD"),
-		sg.Button("-", key = name + "-REMOVE")]
+	return [sg.Combo(*args, key = name + "-COMBO", **kwargs, font = f14, size = max(len(x) for x in args[0]))]
+
+def update_add_rmv_btns(name, *args, **kwargs):
+	return [sg.Button("Update", key = name + "-UPDATE", **kwargs, font = f14),
+		sg.Button("+", key = name + "-ADD", font = f14, size = 3),
+		sg.Button("-", key = name + "-REMOVE", font = f14, size = 3)]
 
 def listbox_el(name, *args, **kwargs):
-	return [sg.Listbox(*args, **kwargs, enable_events=True, size=(40, 15), key = name + "-LISTBOX")]
+	return [sg.Listbox(*args, **kwargs, enable_events=True, key = name + "-LISTBOX", font = f14)]
 
 def clear_save_btn_el(name):
-	return [sg.Button("Clear", key = name + "-CLEAR"),
-		sg.Button("Save", key = name + "-SAVE"),
-		sg.Button("Load", key = name + "-LOAD")]
+	return [sg.Button("Clear", key = name + "-CLEAR", font = f12),
+		sg.Button("Save", key = name + "-SAVE", font = f12),
+		sg.Button("Load", key = name + "-LOAD", font = f12)]
 
 def set_up_gui():
 	# GUI Settings
 	sg.theme("DarkTeal6")
-	sg.set_options(font=("Courier New", 36))
 
 def define_layout(desired_items, all_items, owned_relics, absent_relics, all_relics, data, row_colors):
 	# Layout definition
 	relic_item_col = [
-		text_el("Choose Relic Tier"),
-		combo_el(["Lith", "Meso", "Neo", "Axi"], key = "RELIC-TIER"),
-		text_el("Desired Items:"),
+		[text_el("Choose Relic Tier: ", font = f18), combo_el(["Lith", "Meso", "Neo", "Axi"], key = "RELIC-TIER", font = f16)],
+		[text_el("Desired Items:", font = f18)],
 		search_el("ITEMS", all_items),
-		listbox_el("ITEMS", desired_items),
+		update_add_rmv_btns("ITEMS"),
+		listbox_el("ITEMS", desired_items, size = (max(len(x) for x in all_items), 20)),
 		clear_save_btn_el("ITEMS")
 	]
 
 	owned_col = [
-		text_el("Owned Relics"),
+		[text_el("Owned Relics", font = f18)],
 		search_el("OWNED", all_relics),
-		listbox_el("OWNED", owned_relics),
+		update_add_rmv_btns("OWNED"),
+		listbox_el("OWNED", owned_relics, size = (max(len(x) for x in all_items), 7)),
 		clear_save_btn_el("OWNED"),
-		text_el("Absent Relics"),
+		[text_el("Absent Relics", font = f18)],
 		search_el("ABSENT", all_relics),
-		listbox_el("ABSENT",absent_relics),
+		update_add_rmv_btns("ABSENT"),
+		listbox_el("ABSENT",absent_relics, size = (max(len(x) for x in all_items), 7)),
 		clear_save_btn_el("ABSENT")
 	]
 
 	headings = ['Relic', 'Score', 'Items']
 
 	results_col = [[sg.Table(data, headings=headings, justification='left', key='-TABLE-',
-		row_colors = row_colors, max_col_width = 100),],]
+		row_colors = row_colors, font = f14, num_rows = 20)]]
 
 	l = [
 		[
 			sg.Column(relic_item_col),
 			sg.VSeperator(),
-        	sg.Column(owned_col),
-        	sg.VSeperator(),
+        	sg.Column(owned_col)
+        ],
+        [
         	sg.Column(results_col)
 		]
 	]
@@ -145,7 +155,7 @@ if __name__ == "__main__":
 	data_list = data_df.reset_index().values.tolist()
 
 	l = define_layout(desired_items, all_items, owned_relics, absent_relics, all_relics, data_list, row_colors)
-	window = sg.Window(title = "Void Relic GUI", layout = l)
+	window = sg.Window(title = "Void Relic GUI", layout = l, resizable = True)
 
 	while True:
 		event, values = window.read()
