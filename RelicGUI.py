@@ -125,6 +125,7 @@ if __name__ == "__main__":
 	droptable = rel.read_droptable()
 
 	relic_df = rel.get_relic_list(droptable)
+	relic_df = relic_df.apply(lambda s: s.split(" (Intact)",1)[0])
 
 	# Create a dataframe that contains the items with their respective info
 	item_df = rel.create_item_df(droptable, relic_df)
