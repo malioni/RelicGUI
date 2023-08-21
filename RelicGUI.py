@@ -60,7 +60,7 @@ def define_layout(desired_items, all_items, owned_relics, absent_relics, all_rel
 	headings = ['Relic', 'Score', 'Items']
 
 	results_col = [[sg.Table(data, headings=headings, justification='left', key='-TABLE-',
-		row_colors = row_colors, font = f14, num_rows = 20)]]
+		row_colors = row_colors, font = f14, num_rows = 20, auto_size_columns = False, col_widths = [10,5,60])]]
 
 	l = [
 		[
@@ -126,6 +126,8 @@ def colored_rows(owned_relics, absent_relics, data_df):
 			colors.append((idx, 'green'))
 		elif row["index"] in absent_relics:
 			colors.append((idx, 'red'))
+		else:
+			colors.append((idx, '#3B7EDD'))
 
 	return colors
 
@@ -151,6 +153,8 @@ if __name__ == "__main__":
 	absent_relics = sorted(rel.read_items_list("ABSENT"))
 
 	data_df = rel.calculate_scores(desired_items, item_df[item_df["Relic"].str.contains("Lith")])
+	data_df['Score'] = data_df['Score'].astype(int)
+	data_df['Score'] = data_df['Score'].astype(str)
 	row_colors = colored_rows(owned_relics, absent_relics, data_df)
 	data_list = data_df.reset_index().values.tolist()
 
@@ -166,6 +170,8 @@ if __name__ == "__main__":
 			[desired_items, owned_relics, absent_relics])
 
 		data_df = rel.calculate_scores(desired_items, item_df[item_df["Relic"].str.contains(values["RELIC-TIER"])])
+		data_df['Score'] = data_df['Score'].astype(int)
+		data_df['Score'] = data_df['Score'].astype(str)
 		row_colors = colored_rows(owned_relics, absent_relics, data_df)
 		data_list = data_df.reset_index().values.tolist()
 		window["-TABLE-"].update(values = data_list, row_colors = row_colors)
