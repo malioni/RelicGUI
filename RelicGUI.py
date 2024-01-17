@@ -133,8 +133,9 @@ def colored_rows(owned_relics, absent_relics, data_df):
 
 
 if __name__ == "__main__":
-	# Read the .csv file with the drop table
-	droptable = rel.read_droptable()
+	rel.retrieve_droptable()
+	# Retrieve droptable from Warframe website
+	droptable = rel.retrieve_droptable()
 
 	relic_df = rel.get_relic_list(droptable)
 	relic_df = relic_df.apply(lambda s: s.split(" (Intact)",1)[0])

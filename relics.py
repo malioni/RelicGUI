@@ -1,5 +1,34 @@
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import numpy as np
 
+def retrieve_droptable():
+	res = requests.get('https://www.warframe.com/droptables')
+	soup = BeautifulSoup(res.content, 'html.parser')
+	relic_title = soup.find('h3', {'id': 'relicRewards'})  # Adjust based on your HTML structure
+	relic_tables = relic_title.find_next_sibling('table')
+	# Initialize lists to store data
+	data = []
+
+	# Iterate through the rows of the table
+	for row in relic_tables.find_all('tr'):
+		columns = row.find_all(['td', 'th'])
+		name = columns[0].text.strip()
+		if name == '':
+			continue
+		value = np.nan
+
+		if len(columns) > 1:
+			value = columns[1].text.strip()
+		data.append({'Name': name, 'Value': value})
+
+	# Create a DataFrame
+	df = pd.DataFrame(data)
+
+	# Display the DataFrame
+	return df
+	
 def read_droptable():
 	df = pd.read_csv("Warframe_Relic_Drop_Table.csv", header = None)
 	df.dropna(inplace = True, how = 'all')
